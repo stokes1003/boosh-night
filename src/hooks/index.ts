@@ -8,7 +8,7 @@ export function useFetchMovies() {
   const query = useQuery({
     queryKey: ['movies'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:3000/get-movies');
+      const response = await axios.get('http://localhost:9999/.netlify/functions/getMovies');
       return response.data;
     },
   });
@@ -50,7 +50,7 @@ export function useAddMovie() {
       }
 
       const response = await axios.post(
-        'http://localhost:3000/add-movie',
+        'http://localhost:9999/.netlify/functions/addMovie',
         movie
       );
       queryClient.setQueryData(['movies'], response.data);

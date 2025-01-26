@@ -1,21 +1,50 @@
-# boosh-night
+# React + TypeScript + Vite
 
-Movie Night is a web application designed to simplify your movie-watching experience. With Movie Night, you can search for movies, add them to a personalized watchlist, and remove them when you're done. The app is built with the MERN stack (MongoDB, Express, React, Node.js) and utilizes a movie database API to provide an autocomplete search feature.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Features:
+Currently, two official plugins are available:
 
-Search for Movies: Use the autocomplete search bar powered by a movie database API to quickly find movies.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-Watchlist Management: Add and remove movies from your watchlist with ease.
+## Expanding the ESLint configuration
 
-Responsive Design: Enjoy a seamless experience on both desktop and mobile devices.
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-Tech Stack:
+- Configure the top-level `parserOptions` property like this:
 
-Frontend: React
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
+    },
+  },
+})
+```
 
-Backend: Node.js, Express
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-Database: MongoDB
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
 
-API Integration: Movie database API for autocomplete functionality
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
+})
+```
