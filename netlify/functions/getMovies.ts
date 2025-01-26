@@ -17,9 +17,7 @@ const myHandler: Handler = async (event, context) => {
       .toArray();
     return {
         statusCode: 200,
-        body: JSON.stringify({
-         movies
-        })
+        body: JSON.stringify(movies)
       }
   } catch (error) {
     console.error(error);

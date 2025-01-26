@@ -8,7 +8,7 @@ export function useFetchMovies() {
   const query = useQuery({
     queryKey: ['movies'],
     queryFn: async () => {
-      const response = await axios.get('http://localhost:9999/.netlify/functions/getMovies');
+      const response = await axios.get('/.netlify/functions/getMovies');
       return response.data;
     },
   });
@@ -20,7 +20,7 @@ export function useDeleteMovies() {
   const mutation = useMutation({
     mutationFn: async (selectedRows: number[]) => {
       const response = await axios.delete(
-        'http://localhost:3000/delete-movie',
+        '/.netlify/functions/deleteMovie',
         {
           data: {
             ids: selectedRows,
@@ -42,6 +42,7 @@ export function useAddMovie() {
         console.warn('No valid movie selected.');
         return;
       }
+     
 
       const movieExists = databaseMovies.some((m: Movie) => m.id === movie.id);
       if (movieExists) {
@@ -50,7 +51,7 @@ export function useAddMovie() {
       }
 
       const response = await axios.post(
-        'http://localhost:9999/.netlify/functions/addMovie',
+        '/.netlify/functions/addMovie',
         movie
       );
       queryClient.setQueryData(['movies'], response.data);

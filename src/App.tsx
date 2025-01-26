@@ -44,6 +44,7 @@ function App() {
     );
   };
 
+
   const rows = databaseMovies?.map((movie: Movie) => (
     <Table.Tr
       key={movie.id}

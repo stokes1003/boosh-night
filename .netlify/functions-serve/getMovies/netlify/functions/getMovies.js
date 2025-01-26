@@ -32241,9 +32241,7 @@ var myHandler = async (event, context) => {
     const movies = await client.db("Movie-Night").collection("movies").find().toArray();
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        movies
-      })
+      body: JSON.stringify(movies)
     };
   } catch (error) {
     console.error(error);

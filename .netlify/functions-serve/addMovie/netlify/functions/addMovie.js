@@ -8019,11 +8019,11 @@ var require_mongo_logger = __commonJS({
       }
       return null;
     }
-    function createStdioLogger(stream2) {
+    function createStdioLogger(stream) {
       return {
         write: (0, util_1.promisify)((log, cb) => {
           const logLine = (0, util_1.inspect)(log, { compact: true, breakLength: Infinity });
-          stream2.write(`${logLine}
+          stream.write(`${logLine}
 `, "utf-8", cb);
           return;
         })
@@ -9935,17 +9935,17 @@ var require_aggregate = __commonJS({
     exports2.DB_AGGREGATE_COLLECTION = 1;
     var MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8;
     var AggregateOperation = class extends command_1.CommandOperation {
-      constructor(ns, pipeline2, options) {
+      constructor(ns, pipeline, options) {
         super(void 0, { ...options, dbName: ns.db });
         this.options = { ...options };
         this.target = ns.collection || exports2.DB_AGGREGATE_COLLECTION;
-        this.pipeline = pipeline2;
+        this.pipeline = pipeline;
         this.hasWriteStage = false;
         if (typeof options?.out === "string") {
           this.pipeline = this.pipeline.concat({ $out: options.out });
           this.hasWriteStage = true;
-        } else if (pipeline2.length > 0) {
-          const finalStage = pipeline2[pipeline2.length - 1];
+        } else if (pipeline.length > 0) {
+          const finalStage = pipeline[pipeline.length - 1];
           if (finalStage.$out || finalStage.$merge) {
             this.hasWriteStage = true;
           }
@@ -10027,9 +10027,9 @@ var require_aggregation_cursor = __commonJS({
     var abstract_cursor_1 = require_abstract_cursor();
     var AggregationCursor = class _AggregationCursor extends explain_1.ExplainableCursor {
       /** @internal */
-      constructor(client2, namespace, pipeline2 = [], options = {}) {
+      constructor(client2, namespace, pipeline = [], options = {}) {
         super(client2, namespace, options);
-        this.pipeline = pipeline2;
+        this.pipeline = pipeline;
         this.aggregateOptions = options;
         const lastStage = this.pipeline[this.pipeline.length - 1];
         if (this.cursorOptions.timeoutMS != null && this.cursorOptions.timeoutMode === abstract_cursor_1.CursorTimeoutMode.ITERATION && (lastStage?.$merge != null || lastStage?.$out != null))
@@ -11038,8 +11038,8 @@ var require_list_search_indexes_cursor = __commonJS({
     var ListSearchIndexesCursor = class extends aggregation_cursor_1.AggregationCursor {
       /** @internal */
       constructor({ fullNamespace: ns, client: client2 }, name, options = {}) {
-        const pipeline2 = name == null ? [{ $listSearchIndexes: {} }] : [{ $listSearchIndexes: { name } }];
-        super(client2, ns, pipeline2, options);
+        const pipeline = name == null ? [{ $listSearchIndexes: {} }] : [{ $listSearchIndexes: { name } }];
+        super(client2, ns, pipeline, options);
       }
     };
     exports2.ListSearchIndexesCursor = ListSearchIndexesCursor;
@@ -11987,16 +11987,16 @@ var require_collection = __commonJS({
        * @see https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
        */
       async countDocuments(filter = {}, options = {}) {
-        const pipeline2 = [];
-        pipeline2.push({ $match: filter });
+        const pipeline = [];
+        pipeline.push({ $match: filter });
         if (typeof options.skip === "number") {
-          pipeline2.push({ $skip: options.skip });
+          pipeline.push({ $skip: options.skip });
         }
         if (typeof options.limit === "number") {
-          pipeline2.push({ $limit: options.limit });
+          pipeline.push({ $limit: options.limit });
         }
-        pipeline2.push({ $group: { _id: 1, n: { $sum: 1 } } });
-        const cursor = this.aggregate(pipeline2, options);
+        pipeline.push({ $group: { _id: 1, n: { $sum: 1 } } });
+        const cursor = this.aggregate(pipeline, options);
         const doc = await cursor.next();
         await cursor.close();
         return doc?.n ?? 0;
@@ -12028,11 +12028,11 @@ var require_collection = __commonJS({
        * @param pipeline - An array of aggregation pipelines to execute
        * @param options - Optional settings for the command
        */
-      aggregate(pipeline2 = [], options) {
-        if (!Array.isArray(pipeline2)) {
+      aggregate(pipeline = [], options) {
+        if (!Array.isArray(pipeline)) {
           throw new error_1.MongoInvalidArgumentError('Argument "pipeline" must be an array of aggregation stages');
         }
-        return new aggregation_cursor_1.AggregationCursor(this.client, this.s.namespace, pipeline2, (0, utils_1.resolveOptions)(this, options));
+        return new aggregation_cursor_1.AggregationCursor(this.client, this.s.namespace, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
       /**
        * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
@@ -12125,12 +12125,12 @@ var require_collection = __commonJS({
        * @typeParam TLocal - Type of the data being detected by the change stream
        * @typeParam TChange - Type of the whole change stream document emitted
        */
-      watch(pipeline2 = [], options = {}) {
-        if (!Array.isArray(pipeline2)) {
-          options = pipeline2;
-          pipeline2 = [];
+      watch(pipeline = [], options = {}) {
+        if (!Array.isArray(pipeline)) {
+          options = pipeline;
+          pipeline = [];
         }
-        return new change_stream_1.ChangeStream(this, pipeline2, (0, utils_1.resolveOptions)(this, options));
+        return new change_stream_1.ChangeStream(this, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
       /**
        * Initiate an Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
@@ -12237,9 +12237,9 @@ var require_change_stream_cursor = __commonJS({
     var utils_1 = require_utils();
     var abstract_cursor_1 = require_abstract_cursor();
     var ChangeStreamCursor = class _ChangeStreamCursor extends abstract_cursor_1.AbstractCursor {
-      constructor(client2, namespace, pipeline2 = [], options = {}) {
+      constructor(client2, namespace, pipeline = [], options = {}) {
         super(client2, namespace, { ...options, tailable: true, awaitData: true });
-        this.pipeline = pipeline2;
+        this.pipeline = pipeline;
         this.changeStreamCursorOptions = options;
         this._resumeToken = null;
         this.startAtOperationTime = options.startAtOperationTime ?? null;
@@ -13016,8 +13016,8 @@ var require_db = __commonJS({
        * @param pipeline - An array of aggregation stages to be executed
        * @param options - Optional settings for the command
        */
-      aggregate(pipeline2 = [], options) {
-        return new aggregation_cursor_1.AggregationCursor(this.client, this.s.namespace, pipeline2, (0, utils_1.resolveOptions)(this, options));
+      aggregate(pipeline = [], options) {
+        return new aggregation_cursor_1.AggregationCursor(this.client, this.s.namespace, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
       /** Return the Admin db instance */
       admin() {
@@ -13197,12 +13197,12 @@ var require_db = __commonJS({
        * @typeParam TSchema - Type of the data being detected by the change stream
        * @typeParam TChange - Type of the whole change stream document emitted
        */
-      watch(pipeline2 = [], options = {}) {
-        if (!Array.isArray(pipeline2)) {
-          options = pipeline2;
-          pipeline2 = [];
+      watch(pipeline = [], options = {}) {
+        if (!Array.isArray(pipeline)) {
+          options = pipeline;
+          pipeline = [];
         }
-        return new change_stream_1.ChangeStream(this, pipeline2, (0, utils_1.resolveOptions)(this, options));
+        return new change_stream_1.ChangeStream(this, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
       /**
        * A low level cursor API providing basic driver functionality:
@@ -13274,9 +13274,9 @@ var require_change_stream = __commonJS({
        * @param parent - The parent object that created this change stream
        * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
        */
-      constructor(parent, pipeline2 = [], options = {}) {
+      constructor(parent, pipeline = [], options = {}) {
         super();
-        this.pipeline = pipeline2;
+        this.pipeline = pipeline;
         this.options = { ...options };
         let serverSelectionTimeoutMS;
         delete this.options.writeConcern;
@@ -13487,12 +13487,12 @@ var require_change_stream = __commonJS({
         if (this.type === CHANGE_DOMAIN_TYPES.CLUSTER) {
           changeStreamStageOptions.allChangesForCluster = true;
         }
-        const pipeline2 = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
+        const pipeline = [{ $changeStream: changeStreamStageOptions }, ...this.pipeline];
         const client2 = this.type === CHANGE_DOMAIN_TYPES.CLUSTER ? this.parent : this.type === CHANGE_DOMAIN_TYPES.DATABASE ? this.parent.client : this.type === CHANGE_DOMAIN_TYPES.COLLECTION ? this.parent.client : null;
         if (client2 == null) {
           throw new error_1.MongoRuntimeError(`Changestream type should only be one of cluster, database, collection. Found ${this.type.toString()}`);
         }
-        const changeStreamCursor = new change_stream_cursor_1.ChangeStreamCursor(client2, this.namespace, pipeline2, {
+        const changeStreamCursor = new change_stream_cursor_1.ChangeStreamCursor(client2, this.namespace, pipeline, {
           ...options,
           timeoutContext: this.timeoutContext ? new abstract_cursor_1.CursorTimeoutContext(this.timeoutContext, this.contextOwner) : void 0
         });
@@ -13512,9 +13512,9 @@ var require_change_stream = __commonJS({
       /** @internal */
       _streamEvents(cursor) {
         this._setIsEmitter();
-        const stream2 = this[kCursorStream] ?? cursor.stream();
-        this[kCursorStream] = stream2;
-        stream2.on("data", (change) => {
+        const stream = this[kCursorStream] ?? cursor.stream();
+        this[kCursorStream] = stream;
+        stream.on("data", (change) => {
           try {
             const processedChange = this._processChange(change);
             this.emit(_ChangeStream.CHANGE, processedChange);
@@ -13523,7 +13523,7 @@ var require_change_stream = __commonJS({
           }
           this.timeoutContext?.refresh();
         });
-        stream2.on("error", (error) => this._processErrorStreamMode(error, this.cursor.id != null));
+        stream.on("error", (error) => this._processErrorStreamMode(error, this.cursor.id != null));
       }
       /** @internal */
       _endStream() {
@@ -20062,7 +20062,7 @@ var require_client_encryption = __commonJS({
        */
       async removeKeyAltName(_id, keyAltName) {
         const { db: dbName, collection: collectionName } = utils_1.MongoDBCollectionNamespace.fromString(this._keyVaultNamespace);
-        const pipeline2 = [
+        const pipeline = [
           {
             $set: {
               keyAltNames: {
@@ -20084,7 +20084,7 @@ var require_client_encryption = __commonJS({
             }
           }
         ];
-        const value = await this._keyVaultClient.db(dbName).collection(collectionName).findOneAndUpdate({ _id }, pipeline2, {
+        const value = await this._keyVaultClient.db(dbName).collection(collectionName).findOneAndUpdate({ _id }, pipeline, {
           writeConcern: { w: "majority" },
           returnDocument: "before",
           timeoutMS: this._timeoutMS
@@ -22517,18 +22517,18 @@ var require_connection = __commonJS({
       const description = conn.description;
       return description.logicalSessionTimeoutMinutes != null;
     }
-    function streamIdentifier(stream2, options) {
+    function streamIdentifier(stream, options) {
       if (options.proxyHost) {
         return options.hostAddress.toString();
       }
-      const { remoteAddress, remotePort } = stream2;
+      const { remoteAddress, remotePort } = stream;
       if (typeof remoteAddress === "string" && typeof remotePort === "number") {
         return utils_1.HostAddress.fromHostPort(remoteAddress, remotePort).toString();
       }
       return (0, utils_1.uuidV4)().toString("hex");
     }
     var Connection = class _Connection extends mongo_types_1.TypedEventEmitter {
-      constructor(stream2, options) {
+      constructor(stream, options) {
         super();
         this.lastHelloMS = -1;
         this.helloOk = false;
@@ -22537,9 +22537,9 @@ var require_connection = __commonJS({
         this.clusterTime = null;
         this.error = null;
         this.dataEvents = null;
-        this.socket = stream2;
+        this.socket = stream;
         this.id = options.id;
-        this.address = streamIdentifier(stream2, options);
+        this.address = streamIdentifier(stream, options);
         this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
         this.monitorCommands = options.monitorCommands;
         this.serverApi = options.serverApi;
@@ -22899,8 +22899,8 @@ var require_connection = __commonJS({
     };
     exports2.SizedMessageTransform = SizedMessageTransform;
     var CryptoConnection = class extends Connection {
-      constructor(stream2, options) {
-        super(stream2, options);
+      constructor(stream, options) {
+        super(stream, options);
         this.autoEncrypter = options.autoEncrypter;
       }
       async command(ns, cmd, options, responseType) {
@@ -29387,12 +29387,12 @@ var require_mongo_client = __commonJS({
        * @typeParam TSchema - Type of the data being detected by the change stream
        * @typeParam TChange - Type of the whole change stream document emitted
        */
-      watch(pipeline2 = [], options = {}) {
-        if (!Array.isArray(pipeline2)) {
-          options = pipeline2;
-          pipeline2 = [];
+      watch(pipeline = [], options = {}) {
+        if (!Array.isArray(pipeline)) {
+          options = pipeline;
+          pipeline = [];
         }
-        return new change_stream_1.ChangeStream(this, pipeline2, (0, utils_1.resolveOptions)(this, options));
+        return new change_stream_1.ChangeStream(this, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
     };
     exports2.MongoClient = MongoClient2;
@@ -30631,165 +30631,165 @@ var require_download = __commonJS({
     };
     exports2.GridFSBucketReadStream = GridFSBucketReadStream;
     GridFSBucketReadStream.FILE = "file";
-    function throwIfInitialized(stream2) {
-      if (stream2.s.init) {
+    function throwIfInitialized(stream) {
+      if (stream.s.init) {
         throw new error_1.MongoGridFSStreamError("Options cannot be changed after the stream is initialized");
       }
     }
-    function doRead(stream2) {
-      if (stream2.destroyed)
+    function doRead(stream) {
+      if (stream.destroyed)
         return;
-      if (!stream2.s.cursor)
+      if (!stream.s.cursor)
         return;
-      if (!stream2.s.file)
+      if (!stream.s.file)
         return;
       const handleReadResult = (doc) => {
-        if (stream2.destroyed)
+        if (stream.destroyed)
           return;
         if (!doc) {
-          stream2.push(null);
-          stream2.s.cursor?.close().then(void 0, (error) => stream2.destroy(error));
+          stream.push(null);
+          stream.s.cursor?.close().then(void 0, (error) => stream.destroy(error));
           return;
         }
-        if (!stream2.s.file)
+        if (!stream.s.file)
           return;
-        const bytesRemaining = stream2.s.file.length - stream2.s.bytesRead;
-        const expectedN = stream2.s.expected++;
-        const expectedLength = Math.min(stream2.s.file.chunkSize, bytesRemaining);
+        const bytesRemaining = stream.s.file.length - stream.s.bytesRead;
+        const expectedN = stream.s.expected++;
+        const expectedLength = Math.min(stream.s.file.chunkSize, bytesRemaining);
         if (doc.n > expectedN) {
-          return stream2.destroy(new error_1.MongoGridFSChunkError(`ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`));
+          return stream.destroy(new error_1.MongoGridFSChunkError(`ChunkIsMissing: Got unexpected n: ${doc.n}, expected: ${expectedN}`));
         }
         if (doc.n < expectedN) {
-          return stream2.destroy(new error_1.MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`));
+          return stream.destroy(new error_1.MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}, expected: ${expectedN}`));
         }
         let buf = Buffer.isBuffer(doc.data) ? doc.data : doc.data.buffer;
         if (buf.byteLength !== expectedLength) {
           if (bytesRemaining <= 0) {
-            return stream2.destroy(new error_1.MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}, expected file length ${stream2.s.file.length} bytes but already read ${stream2.s.bytesRead} bytes`));
+            return stream.destroy(new error_1.MongoGridFSChunkError(`ExtraChunk: Got unexpected n: ${doc.n}, expected file length ${stream.s.file.length} bytes but already read ${stream.s.bytesRead} bytes`));
           }
-          return stream2.destroy(new error_1.MongoGridFSChunkError(`ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`));
+          return stream.destroy(new error_1.MongoGridFSChunkError(`ChunkIsWrongSize: Got unexpected length: ${buf.byteLength}, expected: ${expectedLength}`));
         }
-        stream2.s.bytesRead += buf.byteLength;
+        stream.s.bytesRead += buf.byteLength;
         if (buf.byteLength === 0) {
-          return stream2.push(null);
+          return stream.push(null);
         }
         let sliceStart = null;
         let sliceEnd = null;
-        if (stream2.s.bytesToSkip != null) {
-          sliceStart = stream2.s.bytesToSkip;
-          stream2.s.bytesToSkip = 0;
+        if (stream.s.bytesToSkip != null) {
+          sliceStart = stream.s.bytesToSkip;
+          stream.s.bytesToSkip = 0;
         }
-        const atEndOfStream = expectedN === stream2.s.expectedEnd - 1;
-        const bytesLeftToRead = stream2.s.options.end - stream2.s.bytesToSkip;
-        if (atEndOfStream && stream2.s.bytesToTrim != null) {
-          sliceEnd = stream2.s.file.chunkSize - stream2.s.bytesToTrim;
-        } else if (stream2.s.options.end && bytesLeftToRead < doc.data.byteLength) {
+        const atEndOfStream = expectedN === stream.s.expectedEnd - 1;
+        const bytesLeftToRead = stream.s.options.end - stream.s.bytesToSkip;
+        if (atEndOfStream && stream.s.bytesToTrim != null) {
+          sliceEnd = stream.s.file.chunkSize - stream.s.bytesToTrim;
+        } else if (stream.s.options.end && bytesLeftToRead < doc.data.byteLength) {
           sliceEnd = bytesLeftToRead;
         }
         if (sliceStart != null || sliceEnd != null) {
           buf = buf.slice(sliceStart || 0, sliceEnd || buf.byteLength);
         }
-        stream2.push(buf);
+        stream.push(buf);
         return;
       };
-      stream2.s.cursor.next().then(handleReadResult, (error) => {
-        if (stream2.destroyed)
+      stream.s.cursor.next().then(handleReadResult, (error) => {
+        if (stream.destroyed)
           return;
-        stream2.destroy(error);
+        stream.destroy(error);
       });
     }
-    function init(stream2) {
+    function init(stream) {
       const findOneOptions = {};
-      if (stream2.s.readPreference) {
-        findOneOptions.readPreference = stream2.s.readPreference;
+      if (stream.s.readPreference) {
+        findOneOptions.readPreference = stream.s.readPreference;
       }
-      if (stream2.s.options && stream2.s.options.sort) {
-        findOneOptions.sort = stream2.s.options.sort;
+      if (stream.s.options && stream.s.options.sort) {
+        findOneOptions.sort = stream.s.options.sort;
       }
-      if (stream2.s.options && stream2.s.options.skip) {
-        findOneOptions.skip = stream2.s.options.skip;
+      if (stream.s.options && stream.s.options.skip) {
+        findOneOptions.skip = stream.s.options.skip;
       }
       const handleReadResult = (doc) => {
-        if (stream2.destroyed)
+        if (stream.destroyed)
           return;
         if (!doc) {
-          const identifier = stream2.s.filter._id ? stream2.s.filter._id.toString() : stream2.s.filter.filename;
+          const identifier = stream.s.filter._id ? stream.s.filter._id.toString() : stream.s.filter.filename;
           const errmsg = `FileNotFound: file ${identifier} was not found`;
           const err = new error_1.MongoRuntimeError(errmsg);
           err.code = "ENOENT";
-          return stream2.destroy(err);
+          return stream.destroy(err);
         }
         if (doc.length <= 0) {
-          stream2.push(null);
+          stream.push(null);
           return;
         }
-        if (stream2.destroyed) {
-          stream2.destroy();
+        if (stream.destroyed) {
+          stream.destroy();
           return;
         }
         try {
-          stream2.s.bytesToSkip = handleStartOption(stream2, doc, stream2.s.options);
+          stream.s.bytesToSkip = handleStartOption(stream, doc, stream.s.options);
         } catch (error) {
-          return stream2.destroy(error);
+          return stream.destroy(error);
         }
         const filter = { files_id: doc._id };
-        if (stream2.s.options && stream2.s.options.start != null) {
-          const skip = Math.floor(stream2.s.options.start / doc.chunkSize);
+        if (stream.s.options && stream.s.options.start != null) {
+          const skip = Math.floor(stream.s.options.start / doc.chunkSize);
           if (skip > 0) {
             filter["n"] = { $gte: skip };
           }
         }
         let remainingTimeMS2;
         try {
-          remainingTimeMS2 = stream2.s.timeoutContext?.getRemainingTimeMSOrThrow(`Download timed out after ${stream2.s.timeoutContext?.timeoutMS}ms`);
+          remainingTimeMS2 = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(`Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`);
         } catch (error) {
-          return stream2.destroy(error);
+          return stream.destroy(error);
         }
-        stream2.s.cursor = stream2.s.chunks.find(filter, {
-          timeoutMode: stream2.s.options.timeoutMS != null ? abstract_cursor_1.CursorTimeoutMode.LIFETIME : void 0,
+        stream.s.cursor = stream.s.chunks.find(filter, {
+          timeoutMode: stream.s.options.timeoutMS != null ? abstract_cursor_1.CursorTimeoutMode.LIFETIME : void 0,
           timeoutMS: remainingTimeMS2
         }).sort({ n: 1 });
-        if (stream2.s.readPreference) {
-          stream2.s.cursor.withReadPreference(stream2.s.readPreference);
+        if (stream.s.readPreference) {
+          stream.s.cursor.withReadPreference(stream.s.readPreference);
         }
-        stream2.s.expectedEnd = Math.ceil(doc.length / doc.chunkSize);
-        stream2.s.file = doc;
+        stream.s.expectedEnd = Math.ceil(doc.length / doc.chunkSize);
+        stream.s.file = doc;
         try {
-          stream2.s.bytesToTrim = handleEndOption(stream2, doc, stream2.s.cursor, stream2.s.options);
+          stream.s.bytesToTrim = handleEndOption(stream, doc, stream.s.cursor, stream.s.options);
         } catch (error) {
-          return stream2.destroy(error);
+          return stream.destroy(error);
         }
-        stream2.emit(GridFSBucketReadStream.FILE, doc);
+        stream.emit(GridFSBucketReadStream.FILE, doc);
         return;
       };
       let remainingTimeMS;
       try {
-        remainingTimeMS = stream2.s.timeoutContext?.getRemainingTimeMSOrThrow(`Download timed out after ${stream2.s.timeoutContext?.timeoutMS}ms`);
+        remainingTimeMS = stream.s.timeoutContext?.getRemainingTimeMSOrThrow(`Download timed out after ${stream.s.timeoutContext?.timeoutMS}ms`);
       } catch (error) {
-        if (!stream2.destroyed)
-          stream2.destroy(error);
+        if (!stream.destroyed)
+          stream.destroy(error);
         return;
       }
       findOneOptions.timeoutMS = remainingTimeMS;
-      stream2.s.files.findOne(stream2.s.filter, findOneOptions).then(handleReadResult, (error) => {
-        if (stream2.destroyed)
+      stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, (error) => {
+        if (stream.destroyed)
           return;
-        stream2.destroy(error);
+        stream.destroy(error);
       });
     }
-    function waitForFile(stream2, callback) {
-      if (stream2.s.file) {
+    function waitForFile(stream, callback) {
+      if (stream.s.file) {
         return callback();
       }
-      if (!stream2.s.init) {
-        init(stream2);
-        stream2.s.init = true;
+      if (!stream.s.init) {
+        init(stream);
+        stream.s.init = true;
       }
-      stream2.once("file", () => {
+      stream.once("file", () => {
         callback();
       });
     }
-    function handleStartOption(stream2, doc, options) {
+    function handleStartOption(stream, doc, options) {
       if (options && options.start != null) {
         if (options.start > doc.length) {
           throw new error_1.MongoInvalidArgumentError(`Stream start (${options.start}) must not be more than the length of the file (${doc.length})`);
@@ -30800,13 +30800,13 @@ var require_download = __commonJS({
         if (options.end != null && options.end < options.start) {
           throw new error_1.MongoInvalidArgumentError(`Stream start (${options.start}) must not be greater than stream end (${options.end})`);
         }
-        stream2.s.bytesRead = Math.floor(options.start / doc.chunkSize) * doc.chunkSize;
-        stream2.s.expected = Math.floor(options.start / doc.chunkSize);
-        return options.start - stream2.s.bytesRead;
+        stream.s.bytesRead = Math.floor(options.start / doc.chunkSize) * doc.chunkSize;
+        stream.s.expected = Math.floor(options.start / doc.chunkSize);
+        return options.start - stream.s.bytesRead;
       }
       throw new error_1.MongoInvalidArgumentError("Start option must be defined");
     }
-    function handleEndOption(stream2, doc, cursor, options) {
+    function handleEndOption(stream, doc, cursor, options) {
       if (options && options.end != null) {
         if (options.end > doc.length) {
           throw new error_1.MongoInvalidArgumentError(`Stream end (${options.end}) must not be more than the length of the file (${doc.length})`);
@@ -30816,7 +30816,7 @@ var require_download = __commonJS({
         }
         const start = options.start != null ? Math.floor(options.start / doc.chunkSize) : 0;
         cursor.limit(Math.ceil(options.end / doc.chunkSize) - start);
-        stream2.s.expectedEnd = Math.ceil(options.end / doc.chunkSize);
+        stream.s.expectedEnd = Math.ceil(options.end / doc.chunkSize);
         return Math.ceil(options.end / doc.chunkSize) * doc.chunkSize - options.end;
       }
       throw new error_1.MongoInvalidArgumentError("End option must be defined");
@@ -30932,12 +30932,12 @@ var require_upload = __commonJS({
       }
     };
     exports2.GridFSBucketWriteStream = GridFSBucketWriteStream;
-    function handleError(stream2, error, callback) {
-      if (stream2.state.errored) {
+    function handleError(stream, error, callback) {
+      if (stream.state.errored) {
         process.nextTick(callback);
         return;
       }
-      stream2.state.errored = true;
+      stream.state.errored = true;
       process.nextTick(callback, error);
     }
     function createChunkDoc(filesId, n, data) {
@@ -30948,13 +30948,13 @@ var require_upload = __commonJS({
         data
       };
     }
-    async function checkChunksIndex(stream2) {
+    async function checkChunksIndex(stream) {
       const index = { files_id: 1, n: 1 };
       let remainingTimeMS;
-      remainingTimeMS = stream2.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`);
+      remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
       let indexes;
       try {
-        indexes = await stream2.chunks.listIndexes({
+        indexes = await stream.chunks.listIndexes({
           timeoutMode: remainingTimeMS != null ? abstract_cursor_1.CursorTimeoutMode.LIFETIME : void 0,
           timeoutMS: remainingTimeMS
         }).toArray();
@@ -30973,42 +30973,42 @@ var require_upload = __commonJS({
         return false;
       });
       if (!hasChunksIndex) {
-        remainingTimeMS = stream2.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`);
-        await stream2.chunks.createIndex(index, {
-          ...stream2.writeConcern,
+        remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+        await stream.chunks.createIndex(index, {
+          ...stream.writeConcern,
           background: true,
           unique: true,
           timeoutMS: remainingTimeMS
         });
       }
     }
-    function checkDone(stream2, callback) {
-      if (stream2.done) {
+    function checkDone(stream, callback) {
+      if (stream.done) {
         return process.nextTick(callback);
       }
-      if (stream2.state.streamEnd && stream2.state.outstandingRequests === 0 && !stream2.state.errored) {
-        stream2.done = true;
-        const gridFSFile = createFilesDoc(stream2.id, stream2.length, stream2.chunkSizeBytes, stream2.filename, stream2.options.contentType, stream2.options.aliases, stream2.options.metadata);
-        if (isAborted(stream2, callback)) {
+      if (stream.state.streamEnd && stream.state.outstandingRequests === 0 && !stream.state.errored) {
+        stream.done = true;
+        const gridFSFile = createFilesDoc(stream.id, stream.length, stream.chunkSizeBytes, stream.filename, stream.options.contentType, stream.options.aliases, stream.options.metadata);
+        if (isAborted(stream, callback)) {
           return;
         }
-        const remainingTimeMS = stream2.timeoutContext?.remainingTimeMS;
+        const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
         if (remainingTimeMS != null && remainingTimeMS <= 0) {
-          return handleError(stream2, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`), callback);
+          return handleError(stream, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
         }
-        stream2.files.insertOne(gridFSFile, { writeConcern: stream2.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
-          stream2.gridFSFile = gridFSFile;
+        stream.files.insertOne(gridFSFile, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
+          stream.gridFSFile = gridFSFile;
           callback();
         }, (error) => {
-          return handleError(stream2, error, callback);
+          return handleError(stream, error, callback);
         });
         return;
       }
       process.nextTick(callback);
     }
-    async function checkIndexes(stream2) {
-      let remainingTimeMS = stream2.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`);
-      const doc = await stream2.files.findOne({}, {
+    async function checkIndexes(stream) {
+      let remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+      const doc = await stream.files.findOne({}, {
         projection: { _id: 1 },
         timeoutMS: remainingTimeMS
       });
@@ -31017,13 +31017,13 @@ var require_upload = __commonJS({
       }
       const index = { filename: 1, uploadDate: 1 };
       let indexes;
-      remainingTimeMS = stream2.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`);
+      remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
       const listIndexesOptions = {
         timeoutMode: remainingTimeMS != null ? abstract_cursor_1.CursorTimeoutMode.LIFETIME : void 0,
         timeoutMS: remainingTimeMS
       };
       try {
-        indexes = await stream2.files.listIndexes(listIndexesOptions).toArray();
+        indexes = await stream.files.listIndexes(listIndexesOptions).toArray();
       } catch (error) {
         if (error instanceof error_1.MongoError && error.code === error_1.MONGODB_ERROR_CODES.NamespaceNotFound) {
           indexes = [];
@@ -31039,10 +31039,10 @@ var require_upload = __commonJS({
         return false;
       });
       if (!hasFileIndex) {
-        remainingTimeMS = stream2.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`);
-        await stream2.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
+        remainingTimeMS = stream.timeoutContext?.getRemainingTimeMSOrThrow(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`);
+        await stream.files.createIndex(index, { background: false, timeoutMS: remainingTimeMS });
       }
-      await checkChunksIndex(stream2);
+      await checkChunksIndex(stream);
     }
     function createFilesDoc(_id, length, chunkSize, filename, contentType, aliases, metadata) {
       const ret = {
@@ -31063,80 +31063,80 @@ var require_upload = __commonJS({
       }
       return ret;
     }
-    function doWrite(stream2, chunk, encoding, callback) {
-      if (isAborted(stream2, callback)) {
+    function doWrite(stream, chunk, encoding, callback) {
+      if (isAborted(stream, callback)) {
         return;
       }
       const inputBuf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
-      stream2.length += inputBuf.length;
-      if (stream2.pos + inputBuf.length < stream2.chunkSizeBytes) {
-        inputBuf.copy(stream2.bufToStore, stream2.pos);
-        stream2.pos += inputBuf.length;
+      stream.length += inputBuf.length;
+      if (stream.pos + inputBuf.length < stream.chunkSizeBytes) {
+        inputBuf.copy(stream.bufToStore, stream.pos);
+        stream.pos += inputBuf.length;
         process.nextTick(callback);
         return;
       }
       let inputBufRemaining = inputBuf.length;
-      let spaceRemaining = stream2.chunkSizeBytes - stream2.pos;
+      let spaceRemaining = stream.chunkSizeBytes - stream.pos;
       let numToCopy = Math.min(spaceRemaining, inputBuf.length);
       let outstandingRequests = 0;
       while (inputBufRemaining > 0) {
         const inputBufPos = inputBuf.length - inputBufRemaining;
-        inputBuf.copy(stream2.bufToStore, stream2.pos, inputBufPos, inputBufPos + numToCopy);
-        stream2.pos += numToCopy;
+        inputBuf.copy(stream.bufToStore, stream.pos, inputBufPos, inputBufPos + numToCopy);
+        stream.pos += numToCopy;
         spaceRemaining -= numToCopy;
         let doc;
         if (spaceRemaining === 0) {
-          doc = createChunkDoc(stream2.id, stream2.n, Buffer.from(stream2.bufToStore));
-          const remainingTimeMS = stream2.timeoutContext?.remainingTimeMS;
+          doc = createChunkDoc(stream.id, stream.n, Buffer.from(stream.bufToStore));
+          const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
           if (remainingTimeMS != null && remainingTimeMS <= 0) {
-            return handleError(stream2, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`), callback);
+            return handleError(stream, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
           }
-          ++stream2.state.outstandingRequests;
+          ++stream.state.outstandingRequests;
           ++outstandingRequests;
-          if (isAborted(stream2, callback)) {
+          if (isAborted(stream, callback)) {
             return;
           }
-          stream2.chunks.insertOne(doc, { writeConcern: stream2.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
-            --stream2.state.outstandingRequests;
+          stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
+            --stream.state.outstandingRequests;
             --outstandingRequests;
             if (!outstandingRequests) {
-              checkDone(stream2, callback);
+              checkDone(stream, callback);
             }
           }, (error) => {
-            return handleError(stream2, error, callback);
+            return handleError(stream, error, callback);
           });
-          spaceRemaining = stream2.chunkSizeBytes;
-          stream2.pos = 0;
-          ++stream2.n;
+          spaceRemaining = stream.chunkSizeBytes;
+          stream.pos = 0;
+          ++stream.n;
         }
         inputBufRemaining -= numToCopy;
         numToCopy = Math.min(spaceRemaining, inputBufRemaining);
       }
     }
-    function writeRemnant(stream2, callback) {
-      if (stream2.pos === 0) {
-        return checkDone(stream2, callback);
+    function writeRemnant(stream, callback) {
+      if (stream.pos === 0) {
+        return checkDone(stream, callback);
       }
-      const remnant = Buffer.alloc(stream2.pos);
-      stream2.bufToStore.copy(remnant, 0, 0, stream2.pos);
-      const doc = createChunkDoc(stream2.id, stream2.n, remnant);
-      if (isAborted(stream2, callback)) {
+      const remnant = Buffer.alloc(stream.pos);
+      stream.bufToStore.copy(remnant, 0, 0, stream.pos);
+      const doc = createChunkDoc(stream.id, stream.n, remnant);
+      if (isAborted(stream, callback)) {
         return;
       }
-      const remainingTimeMS = stream2.timeoutContext?.remainingTimeMS;
+      const remainingTimeMS = stream.timeoutContext?.remainingTimeMS;
       if (remainingTimeMS != null && remainingTimeMS <= 0) {
-        return handleError(stream2, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream2.timeoutContext?.timeoutMS}ms`), callback);
+        return handleError(stream, new error_1.MongoOperationTimeoutError(`Upload timed out after ${stream.timeoutContext?.timeoutMS}ms`), callback);
       }
-      ++stream2.state.outstandingRequests;
-      stream2.chunks.insertOne(doc, { writeConcern: stream2.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
-        --stream2.state.outstandingRequests;
-        checkDone(stream2, callback);
+      ++stream.state.outstandingRequests;
+      stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern, timeoutMS: remainingTimeMS }).then(() => {
+        --stream.state.outstandingRequests;
+        checkDone(stream, callback);
       }, (error) => {
-        return handleError(stream2, error, callback);
+        return handleError(stream, error, callback);
       });
     }
-    function isAborted(stream2, callback) {
-      if (stream2.state.aborted) {
+    function isAborted(stream, callback) {
+      if (stream.state.aborted) {
         process.nextTick(callback, new error_1.MongoAPIError("Stream has been aborted"));
         return true;
       }
@@ -32096,162 +32096,23 @@ __export(addMovie_exports, {
   handler: () => handler
 });
 module.exports = __toCommonJS(addMovie_exports);
-
-// node_modules/@netlify/functions/dist/chunk-C6P2IO65.mjs
-var __getOwnPropNames2 = Object.getOwnPropertyNames;
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames2(fn)[0]])(fn = 0)), res;
-};
-
-// node_modules/@netlify/functions/dist/chunk-7VFCQORF.mjs
-var BUILDER_FUNCTIONS_FLAG;
-var HTTP_STATUS_METHOD_NOT_ALLOWED;
-var HTTP_STATUS_OK;
-var METADATA_VERSION;
-var init_consts = __esm({
-  "src/lib/consts.ts"() {
-    BUILDER_FUNCTIONS_FLAG = true;
-    HTTP_STATUS_METHOD_NOT_ALLOWED = 405;
-    HTTP_STATUS_OK = 200;
-    METADATA_VERSION = 1;
-  }
-});
-
-// node_modules/@netlify/functions/dist/chunk-6V4VUZWK.mjs
-var augmentResponse;
-var wrapHandler;
-var init_builder = __esm({
-  "src/lib/builder.ts"() {
-    init_consts();
-    augmentResponse = (response) => {
-      if (!response) {
-        return response;
-      }
-      const metadata = { version: METADATA_VERSION, builder_function: BUILDER_FUNCTIONS_FLAG, ttl: response.ttl || 0 };
-      return {
-        ...response,
-        metadata
-      };
-    };
-    wrapHandler = (handler2) => (
-      // eslint-disable-next-line promise/prefer-await-to-callbacks
-      (event, context, callback) => {
-        if (event.httpMethod !== "GET" && event.httpMethod !== "HEAD") {
-          return Promise.resolve({
-            body: "Method Not Allowed",
-            statusCode: HTTP_STATUS_METHOD_NOT_ALLOWED
-          });
-        }
-        const modifiedEvent = {
-          ...event,
-          multiValueQueryStringParameters: {},
-          queryStringParameters: {}
-        };
-        const wrappedCallback = (error, response) => (
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
-          callback ? callback(error, augmentResponse(response)) : null
-        );
-        const execution = handler2(modifiedEvent, context, wrappedCallback);
-        if (typeof execution === "object" && typeof execution.then === "function") {
-          return execution.then(augmentResponse);
-        }
-        return execution;
-      }
-    );
-  }
-});
-
-// node_modules/@netlify/functions/dist/chunk-SURWFFYE.mjs
-var import_process = require("process");
-var purgeCache;
-var init_purge_cache = __esm({
-  "src/lib/purge_cache.ts"() {
-    purgeCache = async (options = {}) => {
-      if (globalThis.fetch === void 0) {
-        throw new Error(
-          "`fetch` is not available. Please ensure you're using Node.js version 18.0.0 or above. Refer to https://ntl.fyi/functions-runtime for more information."
-        );
-      }
-      const payload = {
-        cache_tags: options.tags,
-        deploy_alias: options.deployAlias
-      };
-      const token = import_process.env.NETLIFY_PURGE_API_TOKEN || options.token;
-      if (import_process.env.NETLIFY_LOCAL && !token) {
-        const scope = options.tags?.length ? ` for tags ${options.tags?.join(", ")}` : "";
-        console.log(`Skipping purgeCache${scope} in local development.`);
-        return;
-      }
-      if ("siteSlug" in options) {
-        payload.site_slug = options.siteSlug;
-      } else if ("domain" in options) {
-        payload.domain = options.domain;
-      } else {
-        const siteID = options.siteID || import_process.env.SITE_ID;
-        if (!siteID) {
-          throw new Error(
-            "The Netlify site ID was not found in the execution environment. Please supply it manually using the `siteID` property."
-          );
-        }
-        payload.site_id = siteID;
-      }
-      if (!token) {
-        throw new Error(
-          "The cache purge API token was not found in the execution environment. Please supply it manually using the `token` property."
-        );
-      }
-      const headers = {
-        "Content-Type": "application/json; charset=utf8",
-        Authorization: `Bearer ${token}`
-      };
-      if (options.userAgent) {
-        headers["user-agent"] = options.userAgent;
-      }
-      const apiURL = options.apiURL || "https://api.netlify.com";
-      const response = await fetch(`${apiURL}/api/v1/purge`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(payload)
-      });
-      if (!response.ok) {
-        throw new Error(`Cache purge API call returned an unexpected status code: ${response.status}`);
-      }
-    };
-  }
-});
-
-// node_modules/@netlify/functions/dist/chunk-MMCOWF6U.mjs
-var import_node_stream = require("stream");
-var import_node_util = require("util");
-var pipeline = (0, import_node_util.promisify)(import_node_stream.pipeline);
-
-// node_modules/@netlify/functions/dist/main.mjs
-init_builder();
-init_purge_cache();
-
-// netlify/functions/addMovie.ts
 var import_mongodb = __toESM(require_lib3(), 1);
 var import_dotenv = __toESM(require_main(), 1);
 import_dotenv.default.config();
 var uri = process.env.MONGO_URI;
 var client = new import_mongodb.MongoClient(uri);
-var myHandler = async (event, context) => {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({
-        error: "Method Not Allowed"
-      })
-    };
+var handler = async (event) => {
+  try {
+    await client.connect();
+    const movie = event.body ? JSON.parse(event.body) : null;
+    await client.db("Movie-Night").collection("movies").insertOne(movie);
+    const updatedMovies = await client.db("Movie-Night").collection("movies").find().toArray();
+    return { statusCode: 200, body: JSON.stringify(updatedMovies) };
+  } catch (error) {
+    console.error(error);
+    return { statusCode: 200, body: JSON.stringify({ message: "Error connecting to db" }) };
   }
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "Hello World"
-    })
-  };
 };
-var handler = wrapHandler(myHandler);
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   client,

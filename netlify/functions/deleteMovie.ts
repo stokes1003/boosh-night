@@ -7,11 +7,13 @@ const uri = process.env.MONGO_URI!;
 export const client = new MongoClient(uri);
 
 const handler: Handler = async (event) => {
-    try {
+      try {
         await client.connect();
-       
-        const movie = event.body ? JSON.parse(event.body) : null;
-        await client.db('Movie-Night').collection('movies').insertOne(movie);
+        const { ids } = event.body ? JSON.parse(event.body) : null;
+        await client
+          .db('Movie-Night')
+          .collection('movies')
+          .deleteMany({ id: { $in: ids } });
         const updatedMovies = await client
           .db('Movie-Night')
           .collection('movies')
@@ -26,5 +28,3 @@ const handler: Handler = async (event) => {
 }
 
 export { handler }
-
-
