@@ -107,7 +107,7 @@ function App() {
           </Stack>
         
           <Table.ScrollContainer minWidth={matches ? 500 : 300}>
-            <Table withTableBorder>
+            <Table withTableBorder verticalSpacing="sm">
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Movie Name</Table.Th>
