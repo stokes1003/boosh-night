@@ -32238,7 +32238,7 @@ var client = new import_mongodb.MongoClient(uri);
 var myHandler = async (event, context) => {
   try {
     await client.connect();
-    const movies = await client.db("Movie-Night").collection("movies").find().toArray();
+    const movies = await client.db("Movie-Night").collection("movies").find({ hasWatched: false }).toArray();
     return {
       statusCode: 200,
       body: JSON.stringify(movies)

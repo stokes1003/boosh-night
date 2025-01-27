@@ -12,7 +12,9 @@ const myHandler: Handler = async (event, context) => {
     const movies = await client
       .db("Movie-Night")
       .collection("movies")
-      .find({ hasWatched: false })
+      .find({
+        hasWatched: true,
+      })
       .toArray();
     return {
       statusCode: 200,

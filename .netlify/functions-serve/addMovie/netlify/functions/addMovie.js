@@ -32105,12 +32105,16 @@ var handler = async (event) => {
   try {
     await client.connect();
     const movie = event.body ? JSON.parse(event.body) : null;
+    movie.hasWatched = false;
     await client.db("Movie-Night").collection("movies").insertOne(movie);
-    const updatedMovies = await client.db("Movie-Night").collection("movies").find().toArray();
+    const updatedMovies = await client.db("Movie-Night").collection("movies").find({ hasWatched: false }).toArray();
     return { statusCode: 200, body: JSON.stringify(updatedMovies) };
   } catch (error) {
     console.error(error);
-    return { statusCode: 200, body: JSON.stringify({ message: "Error connecting to db" }) };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Error connecting to db" })
+    };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

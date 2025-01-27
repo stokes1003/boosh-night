@@ -1,6 +1,6 @@
-import { Stack, Text, Table, Button } from "@mantine/core";
+import { Stack, Text, Table, Button, Group } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
-import { useDeleteMovies, useFetchMovies } from "../hooks";
+import { useDeleteMovies, useFetchMovies, useHasWatched } from "../hooks";
 import { useState } from "react";
 import { Movie } from "../App";
 
@@ -8,6 +8,7 @@ export const MoviesToWatch = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const matches = useMediaQuery("(min-width: 540px)");
   const databaseMovies = useFetchMovies();
+  const handleWatched = useHasWatched();
   const handleDelete = useDeleteMovies();
   const handleCheckbox = (movieId: number) => {
     setSelectedRows(
@@ -46,22 +47,36 @@ export const MoviesToWatch = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Movie Name</Table.Th>
-                <th>Year</th>
+                <Table.Th>Year</Table.Th>
               </Table.Tr>
             </Table.Thead>
-            <tbody>{rows}</tbody>
+            <Table.Tbody>{rows}</Table.Tbody>
           </Table>
         </Table.ScrollContainer>
       </Stack>
       {selectedRows.length > 0 && (
-        <Button
-          onClick={async () => {
-            await handleDelete(selectedRows);
-            setSelectedRows([]);
-          }}
-        >
-          Delete Movie
-        </Button>
+        <Group gap="xl">
+          <Button
+            w={150}
+            onClick={async () => {
+              await handleWatched(selectedRows);
+              //   await handleDelete(selectedRows);
+              setSelectedRows([]);
+            }}
+          >
+            Add To Watched
+          </Button>
+          <Button
+            w={150}
+            variant="light"
+            onClick={async () => {
+              await handleDelete(selectedRows);
+              setSelectedRows([]);
+            }}
+          >
+            Delete Movie
+          </Button>
+        </Group>
       )}
     </>
   );
