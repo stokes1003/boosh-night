@@ -43,7 +43,7 @@ export const MoviesToWatch = () => {
         </Stack>
 
         <Table.ScrollContainer minWidth={matches ? 500 : 300}>
-          <Table withTableBorder verticalSpacing="sm">
+          <Table withTableBorder highlightOnHover verticalSpacing="sm">
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Movie Name</Table.Th>
