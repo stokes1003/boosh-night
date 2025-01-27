@@ -2,20 +2,18 @@ import {
   Stack,
   Text,
   Container,
-  Title,
   Table,
   Autocomplete,
   Button,
   Group,
-  Image,
-  Center,
+ 
 } from '@mantine/core';
 
 import { useState } from 'react';
-import booshFace from './assets/images/Boosh.png';
 import { useAddMovie, useDeleteMovies, useFetchMovies } from './hooks';
 import { useAutoComplete } from './hooks';
 import { useMediaQuery } from '@mantine/hooks';
+import { Header } from './components/Header';
 
 export interface Movie {
   title: string;
@@ -64,15 +62,7 @@ function App() {
   return (
     <Container size="sm" mt="lg">
       <Stack align="center" justify="center" gap="xl" my="md">
-        <Center>
-          <Group gap="xl" >
-            <Image radius={100} src={booshFace} h={100} w={100} />
-            <Stack gap="xs">
-              <Title>Boosh Night</Title>
-              <Text fs="italic">'The Tuesday Night Tradition'</Text>
-            </Stack>
-          </Group>
-        </Center>
+       <Header />
         <Stack gap="sm" align={matches ? 'left' : 'center'}>
           <Text size="lg" fw={600}>
             Search for Movies to Add
