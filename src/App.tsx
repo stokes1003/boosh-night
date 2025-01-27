@@ -83,7 +83,7 @@ function App() {
               w={330}
               data={autocompleteData.map((movie) => movie.value) || []}
               value={query}
-              limit={5}
+              limit={matches ? 5 : 3}
               onChange={(value) => setQuery(value)}
             />
             <Button
