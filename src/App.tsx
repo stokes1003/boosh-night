@@ -65,7 +65,7 @@ function App() {
     <Container size="sm" mt="lg">
       <Stack align="center" justify="center" gap="xl" my="md">
         <Center>
-          <Group gap="xl" align="center">
+          <Group gap="xl" >
             <Image radius={100} src={booshFace} h={100} w={100} />
             <Stack gap="xs">
               <Title>Boosh Night</Title>
@@ -73,11 +73,11 @@ function App() {
             </Stack>
           </Group>
         </Center>
-        <Stack gap="sm">
+        <Stack gap="sm" align={matches ? 'left' : 'center'}>
           <Text size="lg" fw={600}>
             Search for Movies to Add
           </Text>
-          <Group>
+          <Group justify='center'>
             <Autocomplete
               placeholder="Search Movies"
               w={330}
@@ -87,7 +87,7 @@ function App() {
               onChange={(value) => setQuery(value)}
             />
             <Button
-              w={150}
+              w={matches ? 150 : 330}
               onClick={async () => {
                 const movie = movies.find((m) => m.title === query);
                 await handleAddMovie(movie!);
@@ -107,7 +107,7 @@ function App() {
           </Stack>
         
           <Table.ScrollContainer minWidth={matches ? 500 : 300}>
-            <Table striped highlightOnHover withTableBorder>
+            <Table withTableBorder>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th>Movie Name</Table.Th>
