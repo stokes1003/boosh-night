@@ -56,8 +56,8 @@ function App() {
       }
       onClick={() => handleCheckbox(movie.id)}
     >
-      <td>{movie.title}</td>
-      <td>{movie.release_date?.split('-')[0] || 'N/A'}</td>
+      <Table.Td>{movie.title}</Table.Td>
+      <Table.Td>{movie.release_date?.split('-')[0] || 'N/A'}</Table.Td>
     </Table.Tr>
   ));
 
@@ -108,12 +108,12 @@ function App() {
         
           <Table.ScrollContainer minWidth={matches ? 500 : 300}>
             <Table striped highlightOnHover withTableBorder>
-              <thead>
-                <tr>
-                  <th>Movie Name</th>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Movie Name</Table.Th>
                   <th>Year</th>
-                </tr>
-              </thead>
+                </Table.Tr>
+              </Table.Thead>
               <tbody>{rows}</tbody>
             </Table>
           </Table.ScrollContainer>
