@@ -15,6 +15,7 @@ import { useState } from 'react';
 import booshFace from './assets/images/Boosh.png';
 import { useAddMovie, useDeleteMovies, useFetchMovies } from './hooks';
 import { useAutoComplete } from './hooks';
+import { useMediaQuery } from '@mantine/hooks';
 
 export interface Movie {
   title: string;
@@ -35,7 +36,7 @@ function App() {
     useAutoComplete();
   const handleDelete = useDeleteMovies();
   const handleAddMovie = useAddMovie();
-
+  const matches = useMediaQuery('(min-width: 540px)');
   const handleCheckbox = (movieId: number) => {
     setSelectedRows(
       !selectedRows.includes(movieId)
@@ -98,15 +99,15 @@ function App() {
             </Button>
           </Group>
         </Stack>
-
-        <Stack>
+        <Stack align="center">
           <Stack gap="sm" align="center">
             <Text size="lg" fw={600}>
               Movies To Watch
             </Text>
           </Stack>
-          <Table.ScrollContainer minWidth={500}>
-            <Table w={500} striped highlightOnHover withTableBorder>
+        
+          <Table.ScrollContainer minWidth={matches ? 500 : 300}>
+            <Table striped highlightOnHover withTableBorder>
               <thead>
                 <tr>
                   <th>Movie Name</th>
