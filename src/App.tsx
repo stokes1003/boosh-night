@@ -25,7 +25,7 @@ export interface AutocompleteMovie {
 
 function App() {
   return (
-    <Container size="sm" mt="lg">
+    <Container size="sm" my="xl">
       <Stack gap="xl">
         <Header />
         <AutoComplete />
