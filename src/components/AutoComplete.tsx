@@ -9,7 +9,7 @@ export const AutoComplete = () => {
   const handleAddMovie = useAddMovie();
 
   return (
-    <Stack gap="sm" align={matches ? "left" : "center"}>
+    <Stack gap="sm" align="center">
       <Text size="lg" fw={600}>
         Search for Movies to Add
       </Text>

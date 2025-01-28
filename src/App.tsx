@@ -1,4 +1,4 @@
-import { Stack, Container, Table, Text } from "@mantine/core";
+import { Stack, Container } from "@mantine/core";
 import { Header } from "./components/Header";
 import { AutoComplete } from "./components/AutoComplete";
 import { MoviesToWatch } from "./components/MoviesToWatch";
@@ -26,7 +26,7 @@ export interface AutocompleteMovie {
 function App() {
   return (
     <Container size="sm" mt="lg">
-      <Stack align="center" justify="center" gap="xl" my="md">
+      <Stack gap="xl">
         <Header />
         <AutoComplete />
         <MoviesToWatch />

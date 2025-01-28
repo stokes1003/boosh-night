@@ -9,10 +9,17 @@ export const WatchedMovies = () => {
 
   const rows = watchedMovies?.map((movie: WatchedMovie) => (
     <Table.Tr key={movie.id}>
-      <Table.Td>{movie.title}</Table.Td>
+      <Table.Td>
+        {matches
+          ? movie.title
+          : movie.title.length > 35
+          ? `${movie.title.slice(0, 35)}...`
+          : movie.title}
+      </Table.Td>
       <Table.Td>{new Date().toLocaleDateString()}</Table.Td>
     </Table.Tr>
   ));
+
   return (
     <Stack align="center">
       <Stack gap="sm" align="center">
@@ -21,12 +28,12 @@ export const WatchedMovies = () => {
         </Text>
       </Stack>
 
-      <Table.ScrollContainer minWidth={matches ? 500 : 300}>
-        <Table withTableBorder striped highlightOnHover verticalSpacing="sm">
+      <Table.ScrollContainer minWidth={matches ? 500 : 330}>
+        <Table withTableBorder highlightOnHover verticalSpacing="sm" w="100%">
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Movie Name</Table.Th>
-              <Table.Th>Date Watched</Table.Th>
+              <Table.Th>Date</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>{rows}</Table.Tbody>

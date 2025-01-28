@@ -28,7 +28,13 @@ export const MoviesToWatch = () => {
       }
       onClick={() => handleCheckbox(movie.id)}
     >
-      <Table.Td>{movie.title}</Table.Td>
+      <Table.Td>
+        {matches
+          ? movie.title
+          : movie.title.length > 35
+          ? `${movie.title.slice(0, 35)}...`
+          : movie.title}
+      </Table.Td>
       <Table.Td>{movie.release_date?.split("-")[0] || "N/A"}</Table.Td>
     </Table.Tr>
   ));
@@ -42,8 +48,8 @@ export const MoviesToWatch = () => {
           </Text>
         </Stack>
 
-        <Table.ScrollContainer minWidth={matches ? 500 : 300}>
-          <Table withTableBorder highlightOnHover verticalSpacing="sm">
+        <Table.ScrollContainer minWidth={matches ? 500 : 330}>
+          <Table withTableBorder highlightOnHover verticalSpacing="sm" w="100%">
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Movie Name</Table.Th>
@@ -55,12 +61,11 @@ export const MoviesToWatch = () => {
         </Table.ScrollContainer>
       </Stack>
       {selectedRows.length > 0 && (
-        <Group gap="xl">
+        <Group gap="xl" justify="center">
           <Button
             w={150}
             onClick={async () => {
               await handleWatched(selectedRows);
-              //   await handleDelete(selectedRows);
               setSelectedRows([]);
             }}
           >
