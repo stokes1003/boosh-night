@@ -35,6 +35,7 @@ export const MoviesToWatch = () => {
           ? `${movie.title.slice(0, 35)}...`
           : movie.title}
       </Table.Td>
+      <Table.Td>{movie.vote_average}</Table.Td>
       <Table.Td>{movie.release_date?.split("-")[0] || "N/A"}</Table.Td>
     </Table.Tr>
   ));
@@ -53,6 +54,7 @@ export const MoviesToWatch = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Movie Name</Table.Th>
+                <Table.Th>Rating</Table.Th>
                 <Table.Th>Year</Table.Th>
               </Table.Tr>
             </Table.Thead>

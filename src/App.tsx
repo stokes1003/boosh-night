@@ -10,6 +10,7 @@ export interface Movie {
   id: number;
   hasWatched: boolean;
   watchedDate: string;
+  vote_average: number;
 }
 
 export interface AutocompleteMovie {
