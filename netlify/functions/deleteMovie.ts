@@ -17,7 +17,7 @@ const handler: Handler = async (event) => {
     const updatedMovies = await client
       .db("Movie-Night")
       .collection("movies")
-      .find({ hasWatched: false })
+      .find()
       .toArray();
     return { statusCode: 200, body: JSON.stringify(updatedMovies) };
   } catch (error) {
