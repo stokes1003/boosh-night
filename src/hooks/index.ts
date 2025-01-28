@@ -55,7 +55,9 @@ export function useDeleteMovies() {
           ids: selectedRows,
         },
       });
-      queryClient.setQueryData(["movies"], response.data);
+
+      queryClient.invalidateQueries(["watched-movies"], response.data);
+      queryClient.invalidateQueries(["movies"], response.data);
     },
   });
   return mutation.mutate;

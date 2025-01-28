@@ -11,6 +11,7 @@ const handler: Handler = async (event) => {
     await client.connect();
     const movie = event.body ? JSON.parse(event.body) : null;
     movie.hasWatched = false;
+    movie.watchedDate = "";
     await client.db("Movie-Night").collection("movies").insertOne(movie);
     const updatedMovies = await client
       .db("Movie-Night")

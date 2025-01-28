@@ -12,7 +12,6 @@ const handler: Handler = async (event) => {
 
     const body = event.body ? JSON.parse(event.body) : null;
     const ids = body?.data?.ids;
-    console.log(ids);
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return {
@@ -25,7 +24,15 @@ const handler: Handler = async (event) => {
     await client
       .db("Movie-Night")
       .collection("movies")
-      .updateMany({ id: { $in: ids } }, { $set: { hasWatched: true } });
+      .updateMany(
+        { id: { $in: ids } },
+        {
+          $set: {
+            hasWatched: true,
+            watchedDate: new Date().toLocaleDateString(),
+          },
+        }
+      );
     const updatedMovies = await client
       .db("Movie-Night")
       .collection("movies")

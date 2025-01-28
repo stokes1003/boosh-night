@@ -1,14 +1,32 @@
-import { Stack, Text, Table } from "@mantine/core";
+import { Stack, Text, Table, Button } from "@mantine/core";
+import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import { WatchedMovie } from "../App";
-import { useFetchWatchedMovies } from "../hooks";
+import { Movie } from "../App";
+import { useFetchWatchedMovies, useDeleteMovies } from "../hooks";
 
 export const WatchedMovies = () => {
   const matches = useMediaQuery("(min-width: 540px)");
   const watchedMovies = useFetchWatchedMovies();
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const handleDelete = useDeleteMovies();
+  const handleCheckbox = (movieId: number) => {
+    setSelectedRows(
+      !selectedRows.includes(movieId)
+        ? [...selectedRows, movieId]
+        : selectedRows.filter((id) => id !== movieId)
+    );
+  };
 
-  const rows = watchedMovies?.map((movie: WatchedMovie) => (
-    <Table.Tr key={movie.id}>
+  const rows = watchedMovies?.map((movie: Movie) => (
+    <Table.Tr
+      key={movie.id}
+      bg={
+        selectedRows.includes(movie.id)
+          ? "var(--mantine-color-blue-light)"
+          : undefined
+      }
+      onClick={() => handleCheckbox(movie.id)}
+    >
       <Table.Td>
         {matches
           ? movie.title
@@ -16,7 +34,7 @@ export const WatchedMovies = () => {
           ? `${movie.title.slice(0, 35)}...`
           : movie.title}
       </Table.Td>
-      <Table.Td>{new Date().toLocaleDateString()}</Table.Td>
+      <Table.Td>{movie.watchedDate}</Table.Td>
     </Table.Tr>
   ));
 
@@ -39,6 +57,17 @@ export const WatchedMovies = () => {
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
       </Table.ScrollContainer>
+      {selectedRows.length > 0 && (
+        <Button
+          w={150}
+          onClick={async () => {
+            await handleDelete(selectedRows);
+            setSelectedRows([]);
+          }}
+        >
+          Delete Movie
+        </Button>
+      )}
     </Stack>
   );
 };

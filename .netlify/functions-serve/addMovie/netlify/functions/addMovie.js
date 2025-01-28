@@ -32106,6 +32106,7 @@ var handler = async (event) => {
     await client.connect();
     const movie = event.body ? JSON.parse(event.body) : null;
     movie.hasWatched = false;
+    movie.watchedDate = "";
     await client.db("Movie-Night").collection("movies").insertOne(movie);
     const updatedMovies = await client.db("Movie-Night").collection("movies").find({ hasWatched: false }).toArray();
     return { statusCode: 200, body: JSON.stringify(updatedMovies) };

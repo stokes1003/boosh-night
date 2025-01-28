@@ -9,12 +9,7 @@ export interface Movie {
   release_date: string;
   id: number;
   hasWatched: boolean;
-}
-
-export interface WatchedMovie {
-  title: string;
-  watched_date: string;
-  id: number;
+  watchedDate: string;
 }
 
 export interface AutocompleteMovie {
