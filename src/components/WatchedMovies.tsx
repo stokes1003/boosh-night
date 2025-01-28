@@ -1,15 +1,17 @@
-import { Stack, Text, Table, Button, Group } from "@mantine/core";
+import { Stack, Text, Table, Button, Group, Modal } from "@mantine/core";
 import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { Movie } from "../App";
 import { useFetchWatchedMovies, useDeleteMovies } from "../hooks";
 import { FaSort } from "react-icons/fa";
+import { useDisclosure } from "@mantine/hooks";
 
 export const WatchedMovies = () => {
   const matches = useMediaQuery("(min-width: 540px)");
   const watchedMovies = useFetchWatchedMovies();
   const [datesSorted, setDatesSorted] = useState(false);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const [opened, { open, close }] = useDisclosure(false);
   const handleDelete = useDeleteMovies();
   const handleCheckbox = (movieId: number) => {
     setSelectedRows(
@@ -75,14 +77,27 @@ export const WatchedMovies = () => {
           <Table.Tbody>{rows}</Table.Tbody>
         </Table>
       </Table.ScrollContainer>
+      <Modal opened={opened} onClose={close} title="Confirm Delete">
+        <Stack align="center">
+          <Text>Are you sure you want to delete this movie?</Text>
+          <Group gap="xl" justify="center">
+            <Button
+              onClick={async () => {
+                await handleDelete(selectedRows);
+                setSelectedRows([]);
+                close();
+              }}
+            >
+              Delete Movie
+            </Button>
+            <Button onClick={close} variant="light">
+              Cancel Delete
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
       {selectedRows.length > 0 && (
-        <Button
-          w={150}
-          onClick={async () => {
-            await handleDelete(selectedRows);
-            setSelectedRows([]);
-          }}
-        >
+        <Button w={150} onClick={open}>
           Delete Movie
         </Button>
       )}
