@@ -1,12 +1,14 @@
-import { Stack, Text, Table, Button } from "@mantine/core";
+import { Stack, Text, Table, Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { Movie } from "../App";
 import { useFetchWatchedMovies, useDeleteMovies } from "../hooks";
+import { FaSort } from "react-icons/fa";
 
 export const WatchedMovies = () => {
   const matches = useMediaQuery("(min-width: 540px)");
   const watchedMovies = useFetchWatchedMovies();
+  const [datesSorted, setDatesSorted] = useState(false);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const handleDelete = useDeleteMovies();
   const handleCheckbox = (movieId: number) => {
@@ -17,7 +19,19 @@ export const WatchedMovies = () => {
     );
   };
 
-  const rows = watchedMovies?.map((movie: Movie) => (
+  const handleDateSort = () => {
+    setDatesSorted(!datesSorted);
+  };
+
+  const sortedDates = (
+    Array.isArray(watchedMovies) ? [...watchedMovies] : []
+  ).sort((a: Movie, b: Movie) =>
+    datesSorted
+      ? new Date(a.watchedDate).getTime() - new Date(b.watchedDate).getTime()
+      : new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
+  );
+
+  const rows = sortedDates?.map((movie: Movie) => (
     <Table.Tr
       key={movie.id}
       bg={
@@ -51,7 +65,11 @@ export const WatchedMovies = () => {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Movie Name</Table.Th>
-              <Table.Th>Date</Table.Th>
+              <Table.Th onClick={handleDateSort}>
+                <Group gap="xs">
+                  Date <FaSort />
+                </Group>
+              </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>{rows}</Table.Tbody>
