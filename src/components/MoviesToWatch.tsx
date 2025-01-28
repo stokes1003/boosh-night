@@ -1,4 +1,4 @@
-import { Stack, Text, Table, Button, Group, Box } from "@mantine/core";
+import { Stack, Text, Table, Button, Group } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useDeleteMovies, useFetchMovies, useHasWatched } from "../hooks";
 import { useState } from "react";
