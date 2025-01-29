@@ -4,6 +4,56 @@ import { Movie } from "../App";
 import { AutocompleteMovie } from "../App";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+export function useStarRating() {
+  const [rating, setRating] = useState(2.75);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentRating, setCurrentRating] = useState(0.5);
+  const [interactive] = useState(true);
+  const calculateRating = (
+    event:
+      | React.MouseEvent<HTMLDivElement>
+      | React.KeyboardEvent<HTMLDivElement>,
+    currentRating: number
+  ) => {
+    const target = event.currentTarget;
+    const rect = target.getBoundingClientRect();
+    let x: number;
+
+    if ("clientX" in event) {
+      x = event.clientX - rect.left;
+    } else {
+      x = (currentRating / 5) * rect.width;
+    }
+
+    const width = rect.width;
+    let newRating = (x / width) * 5;
+
+    newRating = Math.round(newRating / 0.5) * 0.5;
+    newRating = Math.max(newRating, 1);
+    return newRating;
+  };
+
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!interactive || isSubmitting) return;
+    const newRating = calculateRating(event, currentRating);
+    setRating(Math.max(newRating, 1));
+    setCurrentRating(Math.max(newRating, 1));
+    setIsSubmitting(true);
+  };
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const newRating = calculateRating(event, currentRating);
+    setCurrentRating(newRating);
+  };
+  return {
+    handleClick,
+    handleMouseMove,
+    currentRating,
+    rating,
+    isSubmitting,
+  };
+}
+
 export function useFetchMovies() {
   const query = useQuery({
     queryKey: ["movies"],

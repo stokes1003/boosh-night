@@ -2,7 +2,12 @@ import { Stack, Text, Table, Button, Group, Modal } from "@mantine/core";
 import { useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { Movie } from "../App";
-import { useFetchWatchedMovies, useDeleteMovies, useHasRated } from "../hooks";
+import {
+  useFetchWatchedMovies,
+  useDeleteMovies,
+  useHasRated,
+  useStarRating,
+} from "../hooks";
 import { FaSort } from "react-icons/fa";
 import { useDisclosure } from "@mantine/hooks";
 import { CharacterRating } from "react-char-fill";
@@ -15,15 +20,12 @@ export const WatchedMovies = () => {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
   const [deleteOpened, deleteHandler] = useDisclosure(false);
   const [ratingOpened, ratingHandler] = useDisclosure(false);
-  const [currentRating, setCurrentRating] = useState(0.5);
-  const [interactive] = useState(true);
   const handleRated = useHasRated();
-  const [rating, setRating] = useState(2.75);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleDelete = useDeleteMovies();
   const handleDateSort = () => {
     setDatesSorted(!datesSorted);
   };
+  const starRating = useStarRating();
 
   const sortedDates = (
     Array.isArray(watchedMovies) ? [...watchedMovies] : []
@@ -32,44 +34,7 @@ export const WatchedMovies = () => {
       ? new Date(a.watchedDate).getTime() - new Date(b.watchedDate).getTime()
       : new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
   );
-  console.log(rating);
 
-  const calculateRating = (
-    event:
-      | React.MouseEvent<HTMLDivElement>
-      | React.KeyboardEvent<HTMLDivElement>,
-    currentRating: number
-  ) => {
-    const target = event.currentTarget;
-    const rect = target.getBoundingClientRect();
-    let x: number;
-
-    if ("clientX" in event) {
-      x = event.clientX - rect.left;
-    } else {
-      x = (currentRating / 5) * rect.width;
-    }
-
-    const width = rect.width;
-    let newRating = (x / width) * 5;
-
-    newRating = Math.round(newRating / 0.5) * 0.5;
-    newRating = Math.max(newRating, 1);
-    return newRating;
-  };
-
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!interactive || isSubmitting) return;
-    const newRating = calculateRating(event, currentRating);
-    setRating(Math.max(newRating, 1));
-    setCurrentRating(Math.max(newRating, 1));
-    setIsSubmitting(true);
-  };
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const newRating = calculateRating(event, currentRating);
-    setCurrentRating(newRating);
-  };
   const handleDeleteMovieButton = () => {
     ratingHandler.close();
     deleteHandler.open();
@@ -151,20 +116,22 @@ export const WatchedMovies = () => {
       >
         <Stack align="center" gap="xl">
           <CharacterRating
-            rating={currentRating}
+            rating={starRating.currentRating}
             character="★"
             maxRating={5}
             emptyColor="lightgray"
             fontSize="50px"
             fillColor="gold"
             step={0.5}
-            onMouseMove={handleMouseMove}
-            onClick={handleClick}
+            onMouseMove={starRating.handleMouseMove}
+            onClick={starRating.handleClick}
           />
           <Group gap="xl" justify="center">
             <Button
               w={150}
-              onClick={() => handleRatingSubmit(selectedRows, currentRating)}
+              onClick={() =>
+                handleRatingSubmit(selectedRows, starRating.currentRating)
+              }
             >
               Submit Rating
             </Button>
