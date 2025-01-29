@@ -20,16 +20,7 @@ export const WatchedMovies = () => {
   const handleRated = useHasRated();
   const [rating, setRating] = useState(2.75);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleDelete = useDeleteMovies();
-  const handleCheckbox = (movieId: number) => {
-    setSelectedRows(
-      !selectedRows.includes(movieId)
-        ? [...selectedRows, movieId]
-        : selectedRows.filter((id) => id !== movieId)
-    );
-  };
-
   const handleDateSort = () => {
     setDatesSorted(!datesSorted);
   };
@@ -41,6 +32,7 @@ export const WatchedMovies = () => {
       ? new Date(a.watchedDate).getTime() - new Date(b.watchedDate).getTime()
       : new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
   );
+  console.log(rating);
 
   const calculateRating = (
     event:
