@@ -7448,6 +7448,11 @@ rc@1.2.8, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
+react-char-fill@^1.0.20:
+  version "1.0.20"
+  resolved "https://registry.yarnpkg.com/react-char-fill/-/react-char-fill-1.0.20.tgz#f5cba23f2586750d0548c3e7864e1d5ed606ed7f"
+  integrity sha512-8J9IFK9QAyyzBHQuzLF5Ecx4iIY0uzcht+GBfq4sUkh3DlQDmGEMqCpH7tUQEpGbkIxYerm6L+T0yjUCcjJSMA==
+
 react-dom@^18.3.1:
   version "18.3.1"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz"

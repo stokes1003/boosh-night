@@ -9,15 +9,31 @@ export const client = new MongoClient(uri);
 const handler: Handler = async (event) => {
   try {
     await client.connect();
-    const movie = event.body ? JSON.parse(event.body) : null;
-    movie.hasWatched = false;
-    movie.watchedDate = "";
-    movie.hasRated = [];
-    await client.db("Movie-Night").collection("movies").insertOne(movie);
+
+    const body = event.body ? JSON.parse(event.body) : null;
+    const ids = body?.data?.ids;
+    const currentRating = body?.data?.hasRated;
+    console.log(body);
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          message: "Invalid or missing 'ids' in request body",
+        }),
+      };
+    }
+
+    const id = ids[0];
+
+    await client
+      .db("Movie-Night")
+      .collection("movies")
+      .updateOne({ id: id }, { $push: { hasRated: currentRating } });
     const updatedMovies = await client
       .db("Movie-Night")
       .collection("movies")
-      .find({ hasWatched: false })
+      .find()
       .toArray();
     return { statusCode: 200, body: JSON.stringify(updatedMovies) };
   } catch (error) {

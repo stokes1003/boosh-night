@@ -24,6 +24,33 @@ export function useFetchWatchedMovies() {
   });
   return query.data;
 }
+export function useHasRated() {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: async ({
+      selectedRows,
+      currentRating,
+    }: {
+      selectedRows: number[];
+      currentRating: number;
+    }) => {
+      const response = await axios.put("/.netlify/functions/hasRated", {
+        data: {
+          ids: selectedRows,
+          hasRated: currentRating,
+        },
+      });
+      const watched = response.data.filter((movie: Movie) => movie.hasWatched);
+      const hasNotWatched = response.data.filter(
+        (movie: Movie) => !movie.hasWatched
+      );
+
+      queryClient.setQueryData(["watched-movies"], watched);
+      queryClient.setQueryData(["movies"], hasNotWatched);
+    },
+  });
+  return mutation.mutate;
+}
 
 export function useHasWatched() {
   const queryClient = useQueryClient();
