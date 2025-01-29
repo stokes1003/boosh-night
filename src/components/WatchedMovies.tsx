@@ -72,9 +72,10 @@ export const WatchedMovies = () => {
       <Table.Td>
         <Group gap="xs">
           {Array.isArray(movie.hasRated) && movie.hasRated.length > 0
-            ? movie.hasRated.map(Number).reduce((a, b) => a + b, 0) /
-                movie.hasRated.length +
-              1
+            ? (
+                movie.hasRated.map(Number).reduce((a, b) => a + b, 0) /
+                movie.hasRated.length
+              ).toFixed(2)
             : "N/A"}
           <FaStar color="gold" />
         </Group>
@@ -115,7 +116,10 @@ export const WatchedMovies = () => {
       </Table.ScrollContainer>
       <Modal
         opened={ratingOpened}
-        onClose={ratingHandler.close}
+        onClose={() => {
+          ratingHandler.close();
+          starRating.setCurrentRating(0);
+        }}
         title="Rate Movie"
       >
         <Stack align="center" gap="xl">

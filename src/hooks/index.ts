@@ -50,6 +50,7 @@ export function useStarRating() {
     handleMouseMove,
     currentRating,
     rating,
+    setCurrentRating,
     isSubmitting,
   };
 }
