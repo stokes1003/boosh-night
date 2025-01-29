@@ -72,11 +72,10 @@ export const WatchedMovies = () => {
       <Table.Td>
         <Group gap="xs">
           {Array.isArray(movie.hasRated) && movie.hasRated.length > 0
-            ? (
-                movie.hasRated.map(Number).reduce((a, b) => a + b, 0) /
-                movie.hasRated.length
-              ).toFixed(1)
-            : "N/A"}{" "}
+            ? movie.hasRated.map(Number).reduce((a, b) => a + b, 0) /
+                movie.hasRated.length +
+              1
+            : "N/A"}
           <FaStar color="gold" />
         </Group>
       </Table.Td>
@@ -98,7 +97,12 @@ export const WatchedMovies = () => {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Movie Name</Table.Th>
-              <Table.Th>Rating</Table.Th>
+              <Table.Th>
+                <Group gap="xs">
+                  Rating
+                  <FaSort />
+                </Group>
+              </Table.Th>
               <Table.Th onClick={handleDateSort}>
                 <Group gap="xs">
                   Date <FaSort />

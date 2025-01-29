@@ -5,9 +5,9 @@ import { AutocompleteMovie } from "../App";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useStarRating() {
-  const [rating, setRating] = useState(2.75);
+  const [rating, setRating] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentRating, setCurrentRating] = useState(0.5);
+  const [currentRating, setCurrentRating] = useState(0);
   const [interactive] = useState(true);
   const calculateRating = (
     event:
