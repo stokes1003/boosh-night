@@ -99,10 +99,7 @@ export const WatchedMovies = () => {
             <Table.Tr>
               <Table.Th>Movie Name</Table.Th>
               <Table.Th>
-                <Group gap="xs">
-                  Rating
-                  <FaSort />
-                </Group>
+                <Group gap="xs">Rating</Group>
               </Table.Th>
               <Table.Th onClick={handleDateSort}>
                 <Group gap="xs">
