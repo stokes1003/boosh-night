@@ -54,8 +54,8 @@ export const MoviesToWatch = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Movie Name</Table.Th>
-                <Table.Th>Rating</Table.Th>
-                <Table.Th>Year</Table.Th>
+                <Table.Th title="TMDB Rating">Rating</Table.Th>
+                <Table.Th title="Released Year">Year</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>{rows}</Table.Tbody>
